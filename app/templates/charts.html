@@ -1,0 +1,118 @@
+﻿{% extends "layout.html" %}
+{% block content %}
+<div class="container">
+    <div class="row">
+      <div class="col-md-8">
+        <div class="content-section">
+          <div class="buttons">
+            <button class="button" onclick="handleThisClick('Balance', this)">Balance</button>
+            <button id="defaultOpen" class="button" onclick="handleThisClick('Spending', this)">Spending</button>
+            <button class="button" onclick="handleThisClick('Monthly', this)">Monthly</button>
+            <button class="button" onclick="handleThisClick('Saving', this)">Saving</button>
+          </div>
+            <!-- Spending Line chart -->
+          <div id="Spending" class="panel">
+            <legend>Spending</legend>
+            <div>
+              {% if diff_spent == 0 %}
+                <p>Spending the same amount of money as you did last month <b>all spending</b></p>
+              {% elif diff_spent > 0 %}  
+                <p><b>₹{{ diff_spent }}</b> less than last month <b>all spending</b></p>
+              {% else %} 
+                <p><b>₹{{ diff_spent }}</b> greater than last month <b>all spending</b></p>
+              {% endif %}
+            </div>
+            <div>
+              <img src="data:image/png;base64,{{ image_area }}" alt="Spending Trend">
+            </div>
+          </div>
+          <!-- Monthly Bar chart -->
+          <div id="Balance" class="panel">
+            <legend>Monthly Balance</legend>
+            <div>
+                <img src="data:image/png;base64,{{ image_balance }}" alt="Single Bar Chart">
+            </div>
+          </div>
+          <!-- Monthly Bar chart -->
+          <div id="Monthly" class="panel">
+            <legend>Monthly cash flow</legend>
+            <div>
+                <img src="data:image/png;base64,{{ image_bars }}" alt="Monthly Bar Chart">
+            </div>
+          </div>
+          <!-- Saving chart -->
+          <div id="Saving" class="panel">
+            <legend>Your goal in action</legend>
+            <div>
+                <p>Total savings: <b>₹{{ saving }} of {{ total }}</b></p>
+                <p>Target date: <b>{{ target_date }}</b></p>
+                <img src="data:image/png;base64,{{ image_saving }}" alt="Saving Chart">
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="content-section">
+          <legend>{{ current_budget.month }} budget</legend>
+          <!-- If No Budget is created, create it -->
+          {% if current_budget.income == 0 %}
+            <b><p>Create the budget for this month!</p></b>
+            <a href="{{ url_for('budgets.new_budget') }}">Add Budget</a>
+          <!-- If the leftover cash is less than income, Great! -->
+          {% elif current_budget.left_cash < current_budget.income %}  
+            <p>Great job! You have <b style="color: rgb(26, 152, 137);">₹{{ current_budget.left_cash }} left</b></p>
+          <!-- If the spending is over the budget, Warning! -->
+          {% elif spending_amount > current_budget.budget %}  
+            <p>You have spent <b style="color: rgb(242, 58, 58);">₹{{ amount_over }} over!</b></p>
+          {% else %} 
+            <p><b style="color: rgb(242, 58, 58);">Try to spend less next month!</b></p>
+          {% endif %}
+          <div>
+            <img style = "position:relative; left:-20px; top:2px;" src="data:image/png;base64,{{ image_hor_bar }}" alt="Single Bar Chart">
+            <p class='text-muted'><b style="color: #1c1919;">₹{{ spending_amount }}</b> of ₹{{ current_budget.budget }} budget limit spent</p>
+          </div>
+          <div>
+            <b><p>Expenses</b>
+          </div>
+          <div style = "position:relative; left:-20px; top:-20px">
+            <img src="data:image/png;base64,{{ image_pie }}" alt="Pie Chart">
+          </div>
+          <div>
+            <ul class="list-group">
+              {% for key, value in data_dict.items() %}
+                <li class="list-group-item">
+                  <img class="dot-img" style="background-color: {{ value[1] }};" src=""> {{ key }}: <b>₹{{ value[0] }}</b>
+                </li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+  document.getElementById("defaultOpen").click();
+
+  function handleThisClick(item, elmnt) {
+    // Hide all elements with class="panel" by default */
+    var i, tabcontent, tablinks;
+
+    tabcontent = document.getElementsByClassName("panel");
+    for (i = 0; i < tabcontent.length; i++) {
+      tabcontent[i].style.display = "none";
+    }
+
+    // Remove the background color of all tablinks/buttons
+    tablinks = document.getElementsByClassName("button");
+    for (i = 0; i < tablinks.length; i++) {
+      tablinks[i].style.backgroundColor = "";
+    }
+
+    // Show the specific tab content
+    document.getElementById(item).style.display = "block";
+
+    // Add the specific color to the button used to open the tab content
+    elmnt.style.backgroundColor = "#54f0c9";
+  }
+</script>
+{% endblock content %}

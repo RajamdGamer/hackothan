@@ -1,0 +1,139 @@
+﻿{% extends "layout.html" %}
+{% block content %}
+<div class="cardContainer">
+  <!-- LEFTOVER CASH FLOW -->
+  <div class="card" >
+    <div class="left_front">
+      <div>
+        <hr>
+        <h2>Leftover</h2>
+        <p>₹ {{ left_cash }}</p>
+      </div>
+    </div>
+  </div>
+  <!-- EXPENSES TRACK-->
+  <div class="card" >
+    <div class="front">
+      <div>
+        <hr>
+        <h2>Expenses</h2>
+        <p>{{ num_expenses }}</p>
+      </div>
+    </div>
+    <div class="back">
+      <div>
+        <h4>This month (₹)</h4>
+        <p>{{ total_expenses }}</p>
+        <a href="{{ url_for('expenses.new_expense') }}">Add Expense</a>
+      </div>
+    </div>
+  </div>
+  <!-- BUDGET TRACK -->
+  <div class="card" >
+    {% if current_budget %}
+      <div class="front">
+        <div>
+          <hr>
+          <h2>{{ currentMonth }}</h2>
+          <p>₹ {{ current_budget.income }}</p>
+        </div>
+      </div>
+      <div class="back">
+        <div>
+          <h4>Budget (₹)</h4>
+          <p>{{ current_budget.budget }}</p>
+          <a href="{{ url_for('budgets.budget_update', budget_id=current_budget.id) }}">Update Budget</a>
+        </div>
+      </div>
+    {% else %}  
+      <div class="left_front">
+        <div>
+          <hr>
+          <h2>{{ currentMonth }}</h2>
+          <p>None</p>
+          <a href="{{ url_for('budgets.new_budget') }}">Add Budget</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+  <!-- GOAL TRACK -->
+  <div class="card" >
+    {% if current_goal %}
+      <div class="front">
+        <div>
+          <hr>
+          <h2>Goal</h2>
+          <p>{{ current_goal.purpose }}</p>
+        </div>
+      </div>
+      <div class="back">
+        <div>
+          <h4>Saving (₹)</h4>
+          <p>{{ current_goal.amount_saving }}</p>
+          <a href="{{ url_for('goals.goal_update', goal_id=current_goal.id) }}">Update Goal</a>
+        </div>
+      </div>
+    {% else %}  
+      <div class="left_front">
+        <div>
+          <hr>
+          <h2>Goal</h2>
+          <a style="font-size: large;" href="{{ url_for('goals.new_goal') }}">Add Goal</a>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+<!-- Dynamic Table -->
+<div class="content-section">
+    <legend class="border-bottom mb-4">Activity</legend>
+    <!-- Search Engine -->
+    <div>
+      <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+          <label>Time period: </label>
+          {{ form.time_period(class="col-2") }}
+          {{ form.submit }}
+        </div>
+      </form>
+    </div>
+    <div>
+        <table id="data" class="table table-striped">
+            <thead>
+                <tr class="table-header">
+                  <th class="text-center">Date</th>
+                  <th class="text-center">Amount</th>
+                  <th>Expense Details</th>
+                  <th class="text-center">Category</th>
+                  <th class="text-center">Merchant</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for expense in expenses %}
+                  <tr class="table-row">
+                    <td class="text-center" style="width: 18%;">{{ expense.date_spend.strftime("%B %d, %Y") }}</td>
+                    <th class="text-center" style="width: 17%;">₹{{ expense.amount }}</th>
+                    <td class="text-wrap" style="width: 32%;"><a href="{{ url_for('expenses.expense', expense_id=expense.id) }}">{{ expense.title }}</a></td>
+                    <td class="text-center">{{ expense.category }}</td>
+                    <td class="text-center">{{ expense.merchant }}</td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+        </table>
+    </div>
+    {% if is_pagination %}
+      {% for page_num in expenses.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+        {% if page_num %}
+          {% if expenses.page == page_num %}
+            <a class="btn btn-info mb-4" href="{{ url_for('head.home', page=page_num) }}">{{ page_num }}</a>
+          {% else %}
+            <a class="btn btn-outline-info mb-4" href="{{ url_for('head.home', page=page_num) }}">{{ page_num }}</a>
+          {% endif %}
+        {% else %}
+          ...
+        {% endif %}
+      {% endfor %}
+    {% endif %}
+</div>
+{% endblock content %}
